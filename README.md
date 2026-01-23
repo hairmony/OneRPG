@@ -21,8 +21,9 @@
 2. Download the canada_subreddit_comments.csv file
 3. Run `UserProfileArchetype.py` to prepare the model
 4. Run `BuildClusters.py` to create a file called `cluster_profiles.json`
-5. Open OneRPG.py on command line
-6. Launch game by entering the following in your terminal:
+5. Place your Gemini API Key (any text based gemini model, 3-flash is used here) on line 16
+6. Open OneRPG.py on command line
+7. Launch game by entering the following in your terminal:
     ```bash
     python -m streamlit run "OneRPG.py"
     ```
