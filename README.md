@@ -6,6 +6,7 @@
 
 * Python 3.9+
 * `streamlit`
+* `pandas`
 * `numpy`
 * `scikit-learn`
 * `joblib`
