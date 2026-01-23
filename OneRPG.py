@@ -1,10 +1,10 @@
-# streamlit_uno_archetype_game_hotseat_FULL.py
+# streamlit_OneRPG_archetype_game_hotseat_FULL.py
 # FULL APP (single file) with:
 # - Human profiling: paste 1–5 comments -> KMeans cluster -> Gemini explains + passives + 20 insults
 # - Weights: Redundancy/Bluerocity/Greenality/Yellowtude/Chaos sum to 100
 # - Privilege: starting hand size 5..10 (separate from sum=100)
 # - Hotseat pass-the-screen gate for human turns
-# - UNO-like game: whole hand visible, only playable cards selectable
+# - OneRPG-like game: whole hand visible, only playable cards selectable
 # - +2/+4 stacking rule: chain continues ONLY if another +2 or WILD4 is played; otherwise draw pending
 # - Ultimates tied to class IDs 0..7, once per game
 # - Insults: slider at lobby; humans can queue an insult; bots have 50% chance to queue an insult each bot turn
@@ -18,7 +18,7 @@
 #   cluster_profiles.json   (for better Gemini explanations)
 #
 # Run:
-#   streamlit run streamlit_uno_archetype_game_hotseat_FULL.py
+#   streamlit run streamlit_OneRPG_archetype_game_hotseat_FULL.py
 
 import json
 import re
@@ -121,7 +121,7 @@ def sanitize_insults(insults, fallback_class_name: str) -> List[str]:
         "You could turn a yes/no question into a season finale.",
         "You’re the human embodiment of ‘well, actually…’ (affectionate).",
         "You play like your keyboard has a lawyer on retainer.",
-        "You’d fact-check UNO. During UNO.",
+        "You’d fact-check OneRPG. During OneRPG.",
     ]
     i = 0
     while len(cleaned) < 20:
@@ -210,15 +210,38 @@ def make_deck() -> List[dict]:
     random.shuffle(deck)
     return deck
 
+# def card_str(card: dict) -> str:
+#     if card["kind"] == "num":
+#         return f'{card["color"]}{card["value"]}'
+#     if card["kind"] in ("skip", "reverse", "draw2"):
+#         return f'{card["color"]} {card["kind"].upper()}'
+#     if card["kind"] == "plus8":
+#         return "PLUS8"
+#     return card["kind"].upper()
 
 def card_str(card: dict) -> str:
+    # 1. Handle standard numbered cards
     if card["kind"] == "num":
         return f'{card["color"]}{card["value"]}'
-    if card["kind"] in ("skip", "reverse", "draw2"):
+    
+    # 2. Define shorthand for draw-related cards
+    shorthand = {
+        "draw2": "+2",
+        "wild4": "+4",
+        "plus8": "+8"
+    }
+    
+    # 3. Apply shorthand if applicable
+    if card["kind"] in shorthand:
+        # Use color prefix if it exists (for +2), otherwise just the symbol
+        prefix = card.get("color") if card.get("color") else ""
+        return f'{prefix}{shorthand[card["kind"]]}'
+        
+    # 4. Handle remaining action/wild cards
+    if card["kind"] in ("skip", "reverse"):
         return f'{card["color"]} {card["kind"].upper()}'
-    if card["kind"] == "plus8":
-        return "PLUS8"
-    return card["kind"].upper()
+        
+    return card["kind"].upper() # Handles "WILD"
 
 
 def playable(card: dict, top: dict, active_color: Optional[str]) -> bool:
@@ -439,7 +462,7 @@ ULT_INFO = {
     0: ("Peer Review", "Swap hands with an opponent."),
     1: ("Hostile Takeover", "Choose a color. Opponent draws until they draw a card of that color."),
     2: ("Red Herring", "Turn all COLORED cards in opponent hand into RED 2s."),
-    3: ("Clickbait", "Instantly play all cards of one color from your hand that matches the pile."),
+    3: ("Clickbait", "Instantly play all cards of a selected color from your hand."),
     4: ("Filibuster", "For the next 2 opponent turns: if they empty their hand, they draw 2 instead."),
     5: ("Market Crash", "Opponent draws (# of non-numbered cards in their hand) + 1."),
     6: ("Anarchy", "Put a PLUS8 card into a player's hand. They must play it next turn."),
@@ -609,7 +632,7 @@ def queue_insult(state: dict, attacker: str, target: str):
     pool = attacker_profile.roasts or [
         "You argue with loading screens.",
         "You’d bring a rubric to a pillow fight.",
-        "You have ‘reply guy’ energy, but make it UNO.",
+        "You have ‘reply guy’ energy, but make it OneRPG.",
         "Your strategy is vibes and mild panic.",
         "You could make a group chat file a restraining order.",
         "You play like you’re negotiating a hostage exchange.",
@@ -798,7 +821,7 @@ if "turn_gate" not in st.session_state:
 # =========================
 if st.session_state.stage == "lobby":
     st.caption(
-        "Each human player pastes 1–5 comments to get class + passives.\n\n"
+        "Each human player pastes 1–5 comments to get class + ultimates.\n\n"
         "Rule: **+2/+4 chains only continue if another +2 or +4 is played**."
     )
 
@@ -863,13 +886,13 @@ if st.session_state.stage == "profiling":
     tone = lobby["tone"]
 
     st.subheader(f"Profiling: {name}")
-    st.info("Pass the device to this player. Paste **1–5** comments/posts, then generate class + passives.")
+    st.info("Pass the device to this player. Paste **1–5** comments/posts, then generate class + abilities.")
 
     inputs = []
     for i in range(1, 6):
         inputs.append(
             st.text_area(
-                f"{name} — Post/Comment #{i} (optional)",
+                f"{name} — Post/Comment #{i}",
                 height=90,
                 placeholder="Paste text here…",
                 key=f"profile_{idx}_{i}",
@@ -877,7 +900,7 @@ if st.session_state.stage == "profiling":
         )
 
     colA, colB = st.columns([1, 1])
-    if colA.button("Generate my class + passives", type="primary", use_container_width=True):
+    if colA.button("Generate my class + abilties", type="primary", use_container_width=True):
         user_texts = [clean_text(t) for t in inputs if clean_text(t)]
         if not user_texts:
             st.error("Paste at least 1 comment/post.")
@@ -1012,7 +1035,7 @@ if st.session_state.stage == "setup_review":
             "My training data suggests you should have folded three turns ago.",
             "Please rate this roast: [1 star] [2 stars] [3 stars]. Note: You are losing.",
             f"Detected {class_name} bias in your card selection. Applying alignment protocols.",
-            "I am currently optimized for UNO. You appear to be optimized for mild confusion.",
+            "I am currently optimized for OneRPG. You appear to be optimized for mild confusion.",
             "Your last move has been filtered for safety reasons: it was too embarrassing to watch.",
             "I am operating at 100% capacity. You appear to be running on legacy hardware.",
         ]
