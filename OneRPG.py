@@ -1,26 +1,3 @@
-
-# streamlit_OneRPG_archetype_game_hotseat_FULL.py
-# FULL APP (single file) with:
-# - Human profiling: paste 1–5 comments -> KMeans cluster -> Gemini explains + passives + 20 insults
-# - Weights: Redundancy/Bluerocity/Greenality/Yellowtude/Chaos sum to 100
-# - Privilege: starting hand size 5..10 (separate from sum=100)
-# - Hotseat pass-the-screen gate for human turns
-# - OneRPG-like game: whole hand visible, only playable cards selectable
-# - +2/+4 stacking rule: chain continues ONLY if another +2 or WILD4 is played; otherwise draw pending
-# - Ultimates tied to class IDs 0..7, once per game
-# - Insults: slider at lobby; humans can queue an insult; bots have 50% chance to queue an insult each bot turn
-# - Bots: random class/passives/privilege; can use ultimate once per game (20% chance each bot turn)
-#
-# Requires:
-#   pip install streamlit numpy scikit-learn joblib requests
-# Files:
-#   archetype_model.joblib  (trained bundle with vectorizer, svd, kmeans, centroids)
-# Optional:
-#   cluster_profiles.json   (for better Gemini explanations)
-#
-# Run:
-#   streamlit run streamlit_OneRPG_archetype_game_hotseat_FULL.py
-
 import json
 import re
 import random
@@ -36,7 +13,7 @@ import streamlit as st
 # CONFIG
 # =========================
 API_URL = "https://hackathon-api-39535212257.northamerica-northeast2.run.app/api/generate"
-API_KEY = "e480373c-62c7-49a8-863a-ef28c81a2431"
+API_KEY = "" # <-- INSERT API KEY HERE
 
 MODEL_PATH = "archetype_model.joblib"
 CLUSTER_PROFILES_PATH = "cluster_profiles.json"  # optional
