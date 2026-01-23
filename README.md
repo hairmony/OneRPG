@@ -14,7 +14,10 @@
 
 ## Running the App
 
-1. Download dependencies by doing py -m pip install -r Dependencies.txt
+1. Download dependencies by doing
+     ```bash
+     py -m pip install -r Dependencies.txt
+     ```
 2. Run `UserProfileArchetype.py` to prepare the model
 3. Run `BuildClusters.py` to create a file called `cluster_profiles.json`
 4. Open OneRPG.py on command line
